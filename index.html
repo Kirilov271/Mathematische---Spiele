@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathe-Spiel: Challenge</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --panel-bg: rgba(30, 41, 59, 0.85);
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f8fafc;
+      --success: #22c55e;
+      --danger: #ef4444;
+
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Outfit', 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    header h1 {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent-color);
+      margin-bottom: 5px;
+      letter-spacing: -0.5px;
+    }
+
+    .level-badge {
+      font-family: var(--font-heading);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #f59e0b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .menu-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 0;
+    }
+
+    .level-grid {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .level-card {
+      width: 100px;
+      height: 100px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid var(--accent-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .level-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .level-card.passed {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .level-card .check-mark {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 1.1rem;
+      color: var(--success);
+    }
+
+    .menu-msg {
+      min-height: 24px;
+      text-align: center;
+      color: var(--danger);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .back-btn {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: rgba(15, 23, 42, 0.4);
+      padding: 20px;
+      border-radius: 14px;
+    }
+
+    .question-box {
+      font-size: 1.1rem;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Блок вариантов ответов для Level 2 */
+    .options-grid {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .btn-option {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid var(--accent-color);
+      color: #fff;
+      font-size: 1.1rem;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 200px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-option:hover {
+      background: rgba(56, 189, 248, 0.2);
+      transform: translateY(-2px);
+    }
+
+    input[type="number"] {
+      width: 160px;
+      padding: 12px 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      background: #0f172a;
+      color: #fff;
+      outline: none;
+      text-align: center;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent-color);
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-submit {
+      background: var(--accent-color);
+      color: #0f172a;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-next {
+      background: var(--success);
+      color: #fff;
+      display: none;
+    }
+
+    .feedback {
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 800;
+      min-height: 36px;
+    }
+
+    .feedback.correct { color: var(--success); }
+    .feedback.wrong { color: var(--danger); }
+
+    .formula-hint {
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 15px; }
+      header h1 { font-size: 1.6rem; }
+      .input-group { flex-direction: column; width: 100%; }
+      input[type="number"], button { width: 100%; }
+      .options-grid { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HAUPTMENÜ ANSICHT -->
+  <div id="menuView" class="menu-container">
+    <header>
+      <h1>Mathe-Challenge</h1>
+      <p style="color: #94a3b8; margin-top: 5px;">Wähle ein Level aus:</p>
+    </header>
+
+    <div class="level-grid">
+      <div class="level-card" id="cardLvl1" onclick="selectLevel(1)">
+        <span>1</span>
+        <span class="check-mark" id="checkLvl1"></span>
+      </div>
+      <div class="level-card" id="cardLvl2" onclick="selectLevel(2)">
+        <span>2</span>
+        <span class="check-mark" id="checkLvl2"></span>
+      </div>
+    </div>
+
+    <div class="menu-msg" id="menuMsg"></div>
+  </div>
+
+  <!-- SPIEL ANSICHT -->
+  <div id="gameView" class="hidden">
+    <button class="back-btn" onclick="showMenu()">← Menü</button>
+    <header>
+      <div class="level-badge" id="levelDisplay">Level 1</div>
+      <h1 id="topicDisplay">Der Satz des Pythagoras</h1>
+    </header>
+
+    <div class="canvas-container">
+      <canvas id="gameCanvas" width="800" height="450"></canvas>
+    </div>
+
+    <div class="control-panel">
+      <div class="question-box" id="questionBox">
+        Berechne die Höhe des Turms (<span style="color:#3b82f6; font-weight:bold;">a in m</span>), bevor der Stickman herunterspringt!
+      </div>
+
+      <!-- Поле ввода для Level 1 -->
+      <div class="input-group" id="lvl1Controls">
+        <input type="number" id="answerInput" placeholder="Höhe in m" min="1" step="1">
+        <button class="btn-submit" id="submitBtn">Überprüfen</button>
+      </div>
+
+      <!-- Кнопки выбора функций для Level 2 -->
+      <div class="options-grid hidden" id="lvl2Controls">
+        <button class="btn-option" onclick="selectOption(0)" id="opt0">f(x) = ...</button>
+        <button class="btn-option" onclick="selectOption(1)" id="opt1">f(x) = ...</button>
+        <button class="btn-option" onclick="selectOption(2)" id="opt2">f(x) = ...</button>
+      </div>
+
+      <div style="text-align: center;">
+        <button class="btn-next" id="nextBtn">Weiter ➔</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="formula-hint" id="formulaHint">Formel: a² + b² = c² &nbsp;|&nbsp; a = √(c² - b²)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const menuView = document.getElementById('menuView');
+  const gameView = document.getElementById('gameView');
+  const menuMsg = document.getElementById('menuMsg');
+  const checkLvl1 = document.getElementById('checkLvl1');
+  const checkLvl2 = document.getElementById('checkLvl2');
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const answerInput = document.getElementById('answerInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const feedback = document.getElementById('feedback');
+  const levelDisplay = document.getElementById('levelDisplay');
+  const topicDisplay = document.getElementById('topicDisplay');
+  const questionBox = document.getElementById('questionBox');
+  const formulaHint = document.getElementById('formulaHint');
+
+  const lvl1Controls = document.getElementById('lvl1Controls');
+  const lvl2Controls = document.getElementById('lvl2Controls');
+
+  let currentLevel = 1;
+  let level1Passed = false;
+  let level2Passed = false;
+  let level1Streak = 0;
+  let level2Streak = 0;
+
+  const triples = [
+    { a: 8, b: 6, c: 10 },
+    { a: 12, b: 5, c: 13 },
+    { a: 15, b: 8, c: 17 },
+    { a: 12, b: 9, c: 15 },
+    { a: 16, b: 12, c: 20 },
+    { a: 24, b: 7, c: 25 }
+  ];
+
+  let currentProblem = {};
+  let currentOptions = [];
+  let correctOptionIndex = -1;
+
+  let gameState = 'IDLE'; 
+  let animProgress = 0;
+
+  function showMenu() {
+    gameView.classList.add('hidden');
+    menuView.classList.remove('hidden');
+    menuMsg.textContent = '';
+
+    if (level1Passed) {
+      checkLvl1.textContent = '✓';
+      document.getElementById('cardLvl1').classList.add('passed');
+    }
+    if (level2Passed) {
+      checkLvl2.textContent = '✓';
+      document.getElementById('cardLvl2').classList.add('passed');
+    }
+  }
+
+  function selectLevel(lvl) {
+    if (lvl === 2 && !level1Passed) {
+      menuMsg.textContent = 'Du hast Level 1 noch nicht geschafft!';
+      return;
+    }
+    currentLevel = lvl;
+    menuView.classList.add('hidden');
+    gameView.classList.remove('hidden');
+    initRound();
+  }
+
+  function initRound() {
+    gameState = 'IDLE';
+    animProgress = 0;
+    levelDisplay.textContent = `Level ${currentLevel}`;
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    nextBtn.style.display = 'none';
+
+    if (currentLevel === 1) {
+      lvl1Controls.classList.remove('hidden');
+      lvl2Controls.classList.add('hidden');
+      topicDisplay.textContent = 'Der Satz des Pythagoras';
+      questionBox.innerHTML = `Berechne die Höhe des Turms (<span style="color:#3b82f6; font-weight:bold;">a in m</span>), bevor der Stickman herunterspringt!`;
+      formulaHint.innerHTML = `Formel: a² + b² = c² &nbsp;|&nbsp; a = √(c² - b²)`;
+      
+      answerInput.value = '';
+      answerInput.disabled = false;
+      submitBtn.style.display = 'inline-block';
+      currentProblem = triples[level1Streak % triples.length];
+    } 
+    else if (currentLevel === 2) {
+      lvl1Controls.classList.add('hidden');
+      lvl2Controls.classList.remove('hidden');
+      topicDisplay.textContent = 'Lineare Funktionen';
+      questionBox.innerHTML = `Wähle die passende lineare Funktion <span style="color:#38bdf8; font-weight:bold;">f(x) = m·x + t</span> für das Seil vom Turm!`;
+      formulaHint.innerHTML = `Steigung m = (y₂ - y₁) / (x₂ - x₁) &nbsp;|&nbsp; Y-Achsenabschnitt t = f(0)`;
+
+      setupLevel2Problem();
+    }
+
+    drawScene();
+  }
+
+  // Генерация задачи для Level 2 (Прямые)
+  function setupLevel2Problem() {
+    const x1 = 5; 
+    const y1 = Math.floor(Math.random() * 4) + 6; // от 6 до 9 (Башня)
+    
+    const x2 = Math.floor(Math.random() * 4) - 8; // от -8 до -5 (Земля)
+    const y2 = 0;
+
+    const m = (y2 - y1) / (x2 - x1);
+    const t = y1 - m * x1;
+
+    currentProblem = { x1, y1, x2, y2, m, t };
+
+    const formatFunc = (mVal, tVal) => {
+      const mStr = Math.abs(mVal - Math.round(mVal)) < 0.01 
+        ? Math.round(mVal) 
+        : mVal.toFixed(2);
+      const tStr = Math.abs(tVal - Math.round(tVal)) < 0.01 
+        ? (tVal >= 0 ? `+ ${Math.round(tVal)}` : `- ${Math.abs(Math.round(tVal))}`) 
+        : (tVal >= 0 ? `+ ${tVal.toFixed(1)}` : `- ${Math.abs(tVal).toFixed(1)}`);
+      return `f(x) = ${mStr}x ${tStr}`;
+    };
+
+    const correctStr = formatFunc(m, t);
+    
+    // Генерируем 2 фейковых варианта
+    const wrong1 = formatFunc(m * -1, t);
+    const wrong2 = formatFunc(m, t + (Math.random() > 0.5 ? 3 : -3));
+
+    currentOptions = [correctStr, wrong1, wrong2];
+    // Перемешиваем
+    currentOptions.sort(() => Math.random() - 0.5);
+    correctOptionIndex = currentOptions.indexOf(correctStr);
+
+    for (let i = 0; i < 3; i++) {
+      const btn = document.getElementById(`opt${i}`);
+      btn.textContent = currentOptions[i];
+      btn.disabled = false;
+    }
+  }
+
+  // Перевод математических координат (-10..10) в пиксели Canvas
+  function toCanvasX(xMath) {
+    return (xMath + 10) * (canvas.width / 20);
+  }
+  function toCanvasY(yMath) {
+    return (10 - yMath) * (canvas.height / 20);
+  }
+
+  // Отрисовка координатной сетки
+  function drawCoordinateSystem() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+
+    // Сетка
+    for (let i = -10; i <= 10; i += 2.5) {
+      const x = toCanvasX(i);
+      const y = toCanvasY(i);
+
+      ctx.beginPath();
+      ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    // Главные оси X и Y
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 2;
+
+    const zeroX = toCanvasX(0);
+    const zeroY = toCanvasY(0);
+
+    ctx.beginPath();
+    ctx.moveTo(zeroX, 0); ctx.lineTo(zeroX, canvas.height); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, zeroY); ctx.lineTo(canvas.width, zeroY); ctx.stroke();
+
+    // Подписи значений (-10, -5, 5, 10)
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '500 12px Inter, sans-serif';
+    const ticks = [-10, -5, 5, 10];
+    ticks.forEach(tick => {
+      ctx.fillText(tick, toCanvasX(tick) - 8, zeroY + 16);
+      ctx.fillText(tick, zeroX + 6, toCanvasY(tick) + 4);
+    });
+
+    ctx.restore();
+  }
+
+  function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (currentLevel === 2) {
+      // Фон для Level 2
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      drawCoordinateSystem();
+
+      const { x1, y1, x2, y2 } = currentProblem;
+      const px1 = toCanvasX(x1), py1 = toCanvasY(y1);
+      const px2 = toCanvasX(x2), py2 = toCanvasY(y2);
+
+      // Отрисовка Башни
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(px1 - 15, py1, 40, canvas.height - py1);
+
+      // Отрисовка каната (Линейной функции)
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(px1, py1);
+      ctx.lineTo(px2, py2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Точки
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(px1, py1, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(px2, py2, 6, 0, Math.PI * 2); ctx.fill();
+
+      // Стикмен
+      let smX = px1;
+      let smY = py1 - 25;
+
+      if (gameState === 'ANIMATING_WIN') {
+        smX = px1 + (px2 - px1) * animProgress;
+        smY = py1 + (py2 - py1) * animProgress - 25;
+      } else if (gameState === 'ANIMATING_FAIL') {
+        if (animProgress < 0.5) {
+          smX = px1 + (px2 - px1) * animProgress;
+          smY = py1 + (py2 - py1) * animProgress - 25;
+        } else {
+          const fallT = (animProgress - 0.5) / 0.5;
+          smX = px1 + (px2 - px1) * 0.5;
+          smY = (py1 + (py2 - py1) * 0.5 - 25) + fallT * fallT * 200;
+        }
+      }
+
+      drawStickman(smX, smY, gameState);
+      return;
+    }
+
+    // --- LEVEL 1 SCENE ---
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, 320);
+    skyGradient.addColorStop(0, '#38bdf8');
+    skyGradient.addColorStop(1, '#bae6fd');
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, canvas.width, 320);
+
+    drawCloud(100, 70, 40);
+    drawCloud(350, 90, 35);
+    drawCloud(580, 50, 45);
+
+    const grassGradient = ctx.createLinearGradient(0, 320, 0, 450);
+    grassGradient.addColorStop(0, '#4ade80');
+    grassGradient.addColorStop(1, '#15803d');
+    ctx.fillStyle = grassGradient;
+    ctx.fillRect(0, 320, canvas.width, 130);
+
+    ctx.textAlign = 'left';
+
+    const towerWidth = 100;
+    const towerX = 600;
+    const groundY = 320;
+    const towerHeightPx = 200;
+    const towerY = groundY - towerHeightPx;
+
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(towerX, towerY, towerWidth, towerHeightPx);
+
+    ctx.fillStyle = '#475569';
+    for (let i = 0; i < towerWidth; i += 25) {
+      ctx.fillRect(towerX + i, towerY - 12, 15, 12);
+    }
+
+    const poleTopX = towerX;
+    const poleTopY = towerY;
+    const poleBottomX = towerX - 240;
+    const poleBottomY = groundY;
+
+    const stoneCount = currentProblem.b;
+    const stoneSpacing = (poleTopX - poleBottomX) / Math.max(1, stoneCount - 1);
+
+    for (let i = 0; i < stoneCount; i++) {
+      const sx = poleBottomX + i * stoneSpacing;
+      const sy = groundY + 8;
+      ctx.fillStyle = (i % 2 === 0) ? '#94a3b8' : '#cbd5e1';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, 7, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.save();
+    ctx.strokeStyle = '#854d0e';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(poleTopX, poleTopY);
+    ctx.lineTo(poleBottomX, poleBottomY);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.setLineDash([6, 6]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3b82f6';
+    ctx.beginPath();
+    ctx.moveTo(towerX, towerY);
+    ctx.lineTo(towerX, groundY);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(poleBottomX, groundY);
+    ctx.lineTo(towerX, groundY);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = '600 16px Inter, sans-serif';
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillText(`a = ? m`, towerX + 15, towerY + towerHeightPx / 2);
+    ctx.fillStyle = '#991b1b';
+    ctx.fillText(`b = ${currentProblem.b} m (${currentProblem.b} Steine)`, poleBottomX + 40, groundY + 35);
+    ctx.fillStyle = '#713f12';
+    ctx.fillText(`c = ${currentProblem.c} m`, (poleBottomX + towerX) / 2 - 40, (poleTopY + groundY) / 2 - 15);
+
+    let stickmanX = towerX + 35;
+    let stickmanY = towerY - 37;
+
+    if (gameState === 'ANIMATING_WIN') {
+      stickmanY -= Math.abs(Math.sin(animProgress * Math.PI * 4)) * 20;
+    } else if (gameState === 'ANIMATING_FAIL') {
+      const t = animProgress;
+      if (t < 0.4) {
+        stickmanX -= t * 150;
+        stickmanY -= Math.sin(t / 0.4 * Math.PI) * 30;
+      } else {
+        const fallT = (t - 0.4) / 0.6;
+        stickmanX -= 60 + fallT * 30;
+        stickmanY = (towerY - 37) + fallT * fallT * (groundY - towerY + 5);
+      }
+    }
+
+    drawStickman(stickmanX, stickmanY, gameState);
+  }
+
+  function drawCloud(x, y, radius) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.arc(x + radius * 0.7, y - radius * 0.2, radius * 0.7, 0, Math.PI * 2);
+    ctx.arc(x + radius * 1.3, y, radius * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawStickman(x, y, state) {
+    ctx.save();
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 3.5;
+    ctx.fillStyle = '#f8fafc';
+
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(x, y + 8);
+    ctx.lineTo(x, y + 24);
+    ctx.stroke();
+
+    ctx.beginPath();
+    if (state === 'ANIMATING_WIN') {
+      ctx.moveTo(x, y + 12); ctx.lineTo(x - 10, y + 2);
+      ctx.moveTo(x, y + 12); ctx.lineTo(x + 10, y + 2);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x - 6, y + 34);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x + 6, y + 34);
+    } else if (state === 'ANIMATING_FAIL') {
+      ctx.moveTo(x, y + 12); ctx.lineTo(x - 12, y - 4);
+      ctx.moveTo(x, y + 12); ctx.lineTo(x + 12, y - 4);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x - 10, y + 36);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x + 10, y + 36);
+    } else {
+      ctx.moveTo(x, y + 12); ctx.lineTo(x - 8, y + 20);
+      ctx.moveTo(x, y + 12); ctx.lineTo(x + 8, y + 20);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x - 6, y + 36);
+      ctx.moveTo(x, y + 24); ctx.lineTo(x + 6, y + 36);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Выбор ответа в Level 2
+  function selectOption(index) {
+    if (gameState !== 'IDLE') return;
+
+    for (let i = 0; i < 3; i++) {
+      document.getElementById(`opt${i}`).disabled = true;
+    }
+
+    if (index === correctOptionIndex) {
+      level2Streak++;
+      if (level2Streak >= 2) {
+        level2Passed = true;
+        feedback.textContent = 'Level 2 geschafft! 🎉';
+      } else {
+        feedback.textContent = 'Richtig! 1/2 geschafft!';
+      }
+      feedback.className = 'feedback correct';
+      gameState = 'ANIMATING_WIN';
+      animateSuccess();
+    } else {
+      level2Streak = 0;
+      feedback.textContent = 'Falsch! Absturz!';
+      feedback.className = 'feedback wrong';
+      gameState = 'ANIMATING_FAIL';
+      animateFailure();
+    }
+  }
+
+  // Проверка ответа для Level 1
+  function checkAnswer() {
+    if (gameState !== 'IDLE') return;
+
+    const userVal = parseInt(answerInput.value.trim(), 10);
+    if (isNaN(userVal)) {
+      feedback.textContent = 'Bitte eine Zahl eingeben!';
+      feedback.className = 'feedback wrong';
+      return;
+    }
+
+    answerInput.disabled = true;
+
+    if (userVal === currentProblem.a) {
+      level1Streak++;
+      if (level1Streak >= 2) {
+        level1Passed = true;
+        feedback.textContent = 'Level 1 geschafft! 🎉';
+      } else {
+        feedback.textContent = 'Gewonnen! 1/2 geschafft!';
+      }
+      feedback.className = 'feedback correct';
+      gameState = 'ANIMATING_WIN';
+      animateSuccess();
+    } else {
+      level1Streak = 0;
+      gameState = 'ANIMATING_FAIL';
+      animateFailure();
+    }
+  }
+
+  function animateSuccess() {
+    let startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      animProgress = (timestamp - startTime) / 1000;
+      drawScene();
+      if (animProgress < 1.0) {
+        requestAnimationFrame(step);
+      } else {
+        if (currentLevel === 1) submitBtn.style.display = 'none';
+        nextBtn.style.display = 'inline-block';
+        
+        if ((currentLevel === 1 && level1Passed) || (currentLevel === 2 && level2Passed)) {
+          nextBtn.textContent = 'Zum Menü ➔';
+        } else {
+          nextBtn.textContent = 'Nächste Aufgabe ➔';
+        }
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  function animateFailure() {
+    let startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      animProgress = Math.min(1, (timestamp - startTime) / 1200);
+      drawScene();
+      if (animProgress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        if (currentLevel === 1) submitBtn.style.display = 'none';
+        nextBtn.style.display = 'inline-block';
+        nextBtn.textContent = 'Erneut versuchen ↺';
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  submitBtn.addEventListener('click', checkAnswer);
+  answerInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') checkAnswer();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if ((currentLevel === 1 && level1Passed) || (currentLevel === 2 && level2Passed)) {
+      showMenu();
+    } else {
+      initRound();
+    }
+  });
+
+  showMenu();
+</script>
+</body>
+</html>
