@@ -45,7 +45,7 @@
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       background: var(--panel-bg);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -79,24 +79,38 @@
       letter-spacing: 1px;
     }
 
+    /* Menü-Ansicht für viele Level-Sets */
     .menu-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      padding: 20px 0;
+      gap: 25px;
+      padding: 10px 0;
+      width: 100%;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      align-self: flex-start;
+      border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+      padding-bottom: 5px;
+      width: 100%;
     }
 
     .level-grid {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 15px;
+      width: 100%;
     }
 
     .level-card {
-      width: 100px;
-      height: 100px;
+      aspect-ratio: 1;
       background: rgba(15, 23, 42, 0.6);
       border: 2px solid var(--accent-color);
       border-radius: 16px;
@@ -105,7 +119,7 @@
       align-items: center;
       justify-content: center;
       font-family: var(--font-heading);
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       cursor: pointer;
       position: relative;
@@ -123,12 +137,32 @@
       color: var(--success);
     }
 
+    .level-card.star-level {
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    .level-card.star-level:hover {
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.15);
+    }
+
     .level-card .check-mark {
       position: absolute;
-      top: 6px;
-      right: 8px;
-      font-size: 1.1rem;
+      top: 4px;
+      right: 6px;
+      font-size: 1rem;
       color: var(--success);
+    }
+
+    .card-label {
+      position: absolute;
+      bottom: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #f59e0b;
+      text-transform: uppercase;
     }
 
     .menu-msg {
@@ -196,7 +230,6 @@
       align-items: center;
     }
 
-    /* Блок вариантов ответов для Level 2 */
     .options-grid {
       display: flex;
       gap: 12px;
@@ -303,9 +336,11 @@
   <div id="menuView" class="menu-container">
     <header>
       <h1>Mathe-Challenge</h1>
-      <p style="color: #94a3b8; margin-top: 5px;">Wähle ein Level aus:</p>
+      <p style="color: #94a3b8; margin-top: 5px;">Wähle eine Etappe aus:</p>
     </header>
 
+    <!-- SET 1: Anfang des Pfades - Easy level -->
+    <div class="section-title">Anfang des Pfades - Easy level</div>
     <div class="level-grid">
       <div class="level-card" id="cardLvl1" onclick="selectLevel(1)">
         <span>1</span>
@@ -314,6 +349,23 @@
       <div class="level-card" id="cardLvl2" onclick="selectLevel(2)">
         <span>2</span>
         <span class="check-mark" id="checkLvl2"></span>
+      </div>
+      <div class="level-card" id="cardLvl3" onclick="selectLevel(3)">
+        <span>3</span>
+        <span class="check-mark" id="checkLvl3"></span>
+      </div>
+      <div class="level-card" id="cardLvl4" onclick="selectLevel(4)">
+        <span>4</span>
+        <span class="check-mark" id="checkLvl4"></span>
+      </div>
+      <div class="level-card" id="cardLvl5" onclick="selectLevel(5)">
+        <span>5</span>
+        <span class="check-mark" id="checkLvl5"></span>
+      </div>
+      <div class="level-card star-level" id="cardLvl6" onclick="selectLevel(6)">
+        <span>★</span>
+        <span class="card-label">Vorgeschichte</span>
+        <span class="check-mark" id="checkLvl6"></span>
       </div>
     </div>
 
@@ -337,14 +389,14 @@
         Berechne die Höhe des Turms (<span style="color:#3b82f6; font-weight:bold;">a in m</span>), bevor der Stickman herunterspringt!
       </div>
 
-      <!-- Поле ввода для Level 1 -->
+      <!-- Level 1 Steuerung -->
       <div class="input-group" id="lvl1Controls">
         <input type="number" id="answerInput" placeholder="Höhe in m" min="1" step="1">
         <button class="btn-submit" id="submitBtn">Überprüfen</button>
       </div>
 
-      <!-- Кнопки выбора функций для Level 2 -->
-      <div class="options-grid hidden" id="lvl2Controls">
+      <!-- Multiple Choice Steuerung für Level 2 & 3 -->
+      <div class="options-grid hidden" id="choiceControls">
         <button class="btn-option" onclick="selectOption(0)" id="opt0">f(x) = ...</button>
         <button class="btn-option" onclick="selectOption(1)" id="opt1">f(x) = ...</button>
         <button class="btn-option" onclick="selectOption(2)" id="opt2">f(x) = ...</button>
@@ -361,11 +413,10 @@
 </div>
 
 <script>
+  // DOM-Elemente abrufen
   const menuView = document.getElementById('menuView');
   const gameView = document.getElementById('gameView');
   const menuMsg = document.getElementById('menuMsg');
-  const checkLvl1 = document.getElementById('checkLvl1');
-  const checkLvl2 = document.getElementById('checkLvl2');
 
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
@@ -379,14 +430,14 @@
   const formulaHint = document.getElementById('formulaHint');
 
   const lvl1Controls = document.getElementById('lvl1Controls');
-  const lvl2Controls = document.getElementById('lvl2Controls');
+  const choiceControls = document.getElementById('choiceControls');
 
+  // Spiel-Zustand & Fortlaufende Streaks
   let currentLevel = 1;
-  let level1Passed = false;
-  let level2Passed = false;
-  let level1Streak = 0;
-  let level2Streak = 0;
+  const passedLevels = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+  const streaks = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
 
+  // Pythagoreische Tripel für Level 1
   const triples = [
     { a: 8, b: 6, c: 10 },
     { a: 12, b: 5, c: 13 },
@@ -400,46 +451,68 @@
   let currentOptions = [];
   let correctOptionIndex = -1;
 
-  let gameState = 'IDLE'; 
+  let gameState = 'IDLE'; // IDLE, ANIMATING_WIN, ANIMATING_FAIL
   let animProgress = 0;
 
+  // Hilfsfunktion: Saubere Dezimalzahlen generieren (Keine unendlichen Brüche!)
+  function isCleanDecimal(num) {
+    const cleanNumbers = [0.1, 0.2, 0.25, 0.4, 0.5, 0.6, 0.75, 0.8];
+    const absNum = Math.abs(num);
+    if (Number.isInteger(absNum)) return true;
+    const frac = absNum - Math.floor(absNum);
+    return cleanNumbers.some(c => Math.abs(frac - c) < 0.001);
+  }
+
+  function formatNumber(num) {
+    if (Number.isInteger(num)) return num.toString();
+    return num.toFixed(2).replace('.', ',');
+  }
+
+  // Zurück zum Hauptmenü wechseln
   function showMenu() {
     gameView.classList.add('hidden');
     menuView.classList.remove('hidden');
     menuMsg.textContent = '';
 
-    if (level1Passed) {
-      checkLvl1.textContent = '✓';
-      document.getElementById('cardLvl1').classList.add('passed');
-    }
-    if (level2Passed) {
-      checkLvl2.textContent = '✓';
-      document.getElementById('cardLvl2').classList.add('passed');
+    for (let i = 1; i <= 6; i++) {
+      if (passedLevels[i]) {
+        const checkMark = document.getElementById(`checkLvl${i}`);
+        if (checkMark) checkMark.textContent = '✓';
+        const card = document.getElementById(`cardLvl${i}`);
+        if (card) card.classList.add('passed');
+      }
     }
   }
 
+  // Level auswählen mit Freischaltungsprüfung
   function selectLevel(lvl) {
-    if (lvl === 2 && !level1Passed) {
-      menuMsg.textContent = 'Du hast Level 1 noch nicht geschafft!';
+    if (lvl > 1 && !passedLevels[lvl - 1] && lvl !== 6) {
+      menuMsg.textContent = `Du musst Level ${lvl - 1} zuerst bestehen!`;
       return;
     }
+    if (lvl === 6 && !passedLevels[5]) {
+      menuMsg.textContent = 'Schließe zuerst Level 5 ab, um die Vorgeschichte freizuschalten!';
+      return;
+    }
+
     currentLevel = lvl;
     menuView.classList.add('hidden');
     gameView.classList.remove('hidden');
     initRound();
   }
 
+  // Neue Runde im Level initialisieren
   function initRound() {
     gameState = 'IDLE';
     animProgress = 0;
-    levelDisplay.textContent = `Level ${currentLevel}`;
+    levelDisplay.textContent = currentLevel === 6 ? 'Etappe ★' : `Level ${currentLevel}`;
     feedback.textContent = '';
     feedback.className = 'feedback';
     nextBtn.style.display = 'none';
 
     if (currentLevel === 1) {
       lvl1Controls.classList.remove('hidden');
-      lvl2Controls.classList.add('hidden');
+      choiceControls.classList.add('hidden');
       topicDisplay.textContent = 'Der Satz des Pythagoras';
       questionBox.innerHTML = `Berechne die Höhe des Turms (<span style="color:#3b82f6; font-weight:bold;">a in m</span>), bevor der Stickman herunterspringt!`;
       formulaHint.innerHTML = `Formel: a² + b² = c² &nbsp;|&nbsp; a = √(c² - b²)`;
@@ -447,53 +520,63 @@
       answerInput.value = '';
       answerInput.disabled = false;
       submitBtn.style.display = 'inline-block';
-      currentProblem = triples[level1Streak % triples.length];
+      currentProblem = triples[streaks[1] % triples.length];
     } 
     else if (currentLevel === 2) {
       lvl1Controls.classList.add('hidden');
-      lvl2Controls.classList.remove('hidden');
+      choiceControls.classList.remove('hidden');
       topicDisplay.textContent = 'Lineare Funktionen';
-      questionBox.innerHTML = `Wähle die passende lineare Funktion <span style="color:#38bdf8; font-weight:bold;">f(x) = m·x + t</span> für das Seil vom Turm!`;
-      formulaHint.innerHTML = `Steigung m = (y₂ - y₁) / (x₂ - x₁) &nbsp;|&nbsp; Y-Achsenabschnitt t = f(0)`;
+      questionBox.innerHTML = `Wähle die passende lineare Funktion <span style="color:#38bdf8; font-weight:bold;">f(x) = m·x + b</span> für das Seil!`;
+      formulaHint.innerHTML = `Steigung m = (y₂ - y₁) / (x₂ - x₁) &nbsp;|&nbsp; Y-Achsenabschnitt b = f(0)`;
 
       setupLevel2Problem();
+    }
+    else if (currentLevel === 3) {
+      lvl1Controls.classList.add('hidden');
+      choiceControls.classList.remove('hidden');
+      topicDisplay.textContent = 'Quadratische Funktionen (Brücke)';
+      questionBox.innerHTML = `Finde die richtige Parabel <span style="color:#38bdf8; font-weight:bold;">f(x) = a·x² + c</span>, um den Fluss zu überqueren!`;
+      formulaHint.innerHTML = `Scheitelpunktform: f(x) = a·x² + c &nbsp;|&nbsp; Öffnung nach unten (a < 0)`;
+
+      setupLevel3Problem();
+    }
+    else {
+      // Platzhalter für Level 4, 5, 6
+      lvl1Controls.classList.add('hidden');
+      choiceControls.classList.add('hidden');
+      topicDisplay.textContent = currentLevel === 6 ? 'Vorgeschichte ★' : `Level ${currentLevel}`;
+      questionBox.innerHTML = `Level ${currentLevel} ist in Vorbereitung!`;
+      formulaHint.innerHTML = `Demnächst verfügbar`;
     }
 
     drawScene();
   }
 
-  // Генерация задачи для Level 2 (Прямые)
+  // --- LEVEL 2 GENERATOR (Lineare Funktionen) ---
   function setupLevel2Problem() {
-    const x1 = 5; 
-    const y1 = Math.floor(Math.random() * 4) + 6; // от 6 до 9 (Башня)
-    
-    const x2 = Math.floor(Math.random() * 4) - 8; // от -8 до -5 (Земля)
-    const y2 = 0;
+    let m, b, x1, y1, x2, y2;
+    do {
+      x1 = 5;
+      y1 = Math.floor(Math.random() * 4) + 6;
+      x2 = Math.floor(Math.random() * 4) - 8;
+      y2 = 0;
+      m = (y2 - y1) / (x2 - x1);
+      b = y1 - m * x1;
+    } while (!isCleanDecimal(m) || !isCleanDecimal(b));
 
-    const m = (y2 - y1) / (x2 - x1);
-    const t = y1 - m * x1;
+    currentProblem = { x1, y1, x2, y2, m, b };
 
-    currentProblem = { x1, y1, x2, y2, m, t };
-
-    const formatFunc = (mVal, tVal) => {
-      const mStr = Math.abs(mVal - Math.round(mVal)) < 0.01 
-        ? Math.round(mVal) 
-        : mVal.toFixed(2);
-      const tStr = Math.abs(tVal - Math.round(tVal)) < 0.01 
-        ? (tVal >= 0 ? `+ ${Math.round(tVal)}` : `- ${Math.abs(Math.round(tVal))}`) 
-        : (tVal >= 0 ? `+ ${tVal.toFixed(1)}` : `- ${Math.abs(tVal).toFixed(1)}`);
-      return `f(x) = ${mStr}x ${tStr}`;
+    const formatLine = (mVal, bVal) => {
+      const mStr = formatNumber(mVal);
+      const bStr = bVal >= 0 ? `+ ${formatNumber(bVal)}` : `- ${formatNumber(Math.abs(bVal))}`;
+      return `f(x) = ${mStr}x ${bStr}`;
     };
 
-    const correctStr = formatFunc(m, t);
-    
-    // Генерируем 2 фейковых варианта
-    const wrong1 = formatFunc(m * -1, t);
-    const wrong2 = formatFunc(m, t + (Math.random() > 0.5 ? 3 : -3));
+    const correctStr = formatLine(m, b);
+    const wrong1 = formatLine(m * -1, b);
+    const wrong2 = formatLine(m, b + (b >= 0 ? -2 : 2));
 
-    currentOptions = [correctStr, wrong1, wrong2];
-    // Перемешиваем
-    currentOptions.sort(() => Math.random() - 0.5);
+    currentOptions = [correctStr, wrong1, wrong2].sort(() => Math.random() - 0.5);
     correctOptionIndex = currentOptions.indexOf(correctStr);
 
     for (let i = 0; i < 3; i++) {
@@ -503,51 +586,65 @@
     }
   }
 
-  // Перевод математических координат (-10..10) в пиксели Canvas
-  function toCanvasX(xMath) {
-    return (xMath + 10) * (canvas.width / 20);
-  }
-  function toCanvasY(yMath) {
-    return (10 - yMath) * (canvas.height / 20);
+  // --- LEVEL 3 GENERATOR (Quadratische Brücke f(x) = a*x² + c) ---
+  function setupLevel3Problem() {
+    let a, c, d;
+    do {
+      d = Math.floor(Math.random() * 3) + 3;
+      c = Math.floor(Math.random() * 4) + 4;
+      a = -c / (d * d);
+    } while (!isCleanDecimal(a));
+
+    currentProblem = { a, c, d };
+
+    const formatParabola = (aVal, cVal) => {
+      const aStr = formatNumber(aVal);
+      const cStr = cVal >= 0 ? `+ ${formatNumber(cVal)}` : `- ${formatNumber(Math.abs(cVal))}`;
+      return `f(x) = ${aStr}x² ${cStr}`;
+    };
+
+    const correctStr = formatParabola(a, c);
+    const wrong1 = formatParabola(-a, c);
+    const wrong2 = formatParabola(a, c + 2);
+
+    currentOptions = [correctStr, wrong1, wrong2].sort(() => Math.random() - 0.5);
+    correctOptionIndex = currentOptions.indexOf(correctStr);
+
+    for (let i = 0; i < 3; i++) {
+      const btn = document.getElementById(`opt${i}`);
+      btn.textContent = currentOptions[i];
+      btn.disabled = false;
+    }
   }
 
-  // Отрисовка координатной сетки
+  // Koordinaten-Umrechnung für das Grid (Level 2)
+  function toCanvasX(xMath) { return (xMath + 10) * (canvas.width / 20); }
+  function toCanvasY(yMath) { return (10 - yMath) * (canvas.height / 20); }
+
   function drawCoordinateSystem() {
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
     ctx.lineWidth = 1;
 
-    // Сетка
     for (let i = -10; i <= 10; i += 2.5) {
       const x = toCanvasX(i);
       const y = toCanvasY(i);
 
-      ctx.beginPath();
-      ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
     }
 
-    // Главные оси X и Y
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.lineWidth = 2;
-
     const zeroX = toCanvasX(0);
     const zeroY = toCanvasY(0);
 
-    ctx.beginPath();
-    ctx.moveTo(zeroX, 0); ctx.lineTo(zeroX, canvas.height); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, zeroY); ctx.lineTo(canvas.width, zeroY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(zeroX, 0); ctx.lineTo(zeroX, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(canvas.width, zeroY); ctx.stroke();
 
-    // Подписи значений (-10, -5, 5, 10)
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '500 12px Inter, sans-serif';
-    const ticks = [-10, -5, 5, 10];
-    ticks.forEach(tick => {
+    [-10, -5, 5, 10].forEach(tick => {
       ctx.fillText(tick, toCanvasX(tick) - 8, zeroY + 16);
       ctx.fillText(tick, zeroX + 6, toCanvasY(tick) + 4);
     });
@@ -555,43 +652,34 @@
     ctx.restore();
   }
 
+  // Haupt-Zeichenfunktion für Canvas
   function drawScene() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // --- LEVEL 2: Lineare Funktionen ---
     if (currentLevel === 2) {
-      // Фон для Level 2
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
       drawCoordinateSystem();
 
       const { x1, y1, x2, y2 } = currentProblem;
       const px1 = toCanvasX(x1), py1 = toCanvasY(y1);
       const px2 = toCanvasX(x2), py2 = toCanvasY(y2);
 
-      // Отрисовка Башни
       ctx.fillStyle = '#475569';
       ctx.fillRect(px1 - 15, py1, 40, canvas.height - py1);
 
-      // Отрисовка каната (Линейной функции)
       ctx.save();
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(px1, py1);
-      ctx.lineTo(px2, py2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px1, py1); ctx.lineTo(px2, py2); ctx.stroke();
       ctx.restore();
 
-      // Точки
       ctx.fillStyle = '#ef4444';
       ctx.beginPath(); ctx.arc(px1, py1, 6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(px2, py2, 6, 0, Math.PI * 2); ctx.fill();
 
-      // Стикмен
-      let smX = px1;
-      let smY = py1 - 25;
-
+      let smX = px1, smY = py1 - 25;
       if (gameState === 'ANIMATING_WIN') {
         smX = px1 + (px2 - px1) * animProgress;
         smY = py1 + (py2 - py1) * animProgress - 25;
@@ -605,12 +693,73 @@
           smY = (py1 + (py2 - py1) * 0.5 - 25) + fallT * fallT * 200;
         }
       }
+      drawStickman(smX, smY, gameState);
+      return;
+    }
+
+    // --- LEVEL 3: Parabel-Brücke über den Fluss ---
+    if (currentLevel === 3) {
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, 300);
+      skyGradient.addColorStop(0, '#38bdf8');
+      skyGradient.addColorStop(1, '#bae6fd');
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, canvas.width, 300);
+
+      drawCloud(100, 60, 35);
+      drawCloud(600, 80, 40);
+
+      const riverLeft = 250;
+      const riverRight = 550;
+      const groundY = 320;
+
+      ctx.fillStyle = '#15803d';
+      ctx.fillRect(0, groundY, riverLeft, canvas.height - groundY);
+      ctx.fillRect(riverRight, groundY, canvas.width - riverRight, canvas.height - groundY);
+
+      const waterGrad = ctx.createLinearGradient(riverLeft, 0, riverRight, 0);
+      waterGrad.addColorStop(0, '#0284c7');
+      waterGrad.addColorStop(0.5, '#38bdf8');
+      waterGrad.addColorStop(1, '#0284c7');
+      ctx.fillStyle = waterGrad;
+      ctx.fillRect(riverLeft, groundY, riverRight - riverLeft, canvas.height - groundY);
+
+      ctx.save();
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+
+      const bridgeWidth = riverRight - riverLeft;
+      const archHeight = currentProblem.c * 18;
+
+      ctx.moveTo(riverLeft, groundY);
+      ctx.quadraticCurveTo(riverLeft + bridgeWidth / 2, groundY - archHeight * 2, riverRight, groundY);
+      ctx.stroke();
+      ctx.restore();
+
+      let smX = riverLeft - 20;
+      let smY = groundY - 25;
+
+      if (gameState === 'ANIMATING_WIN') {
+        smX = riverLeft - 20 + (riverRight - riverLeft + 40) * animProgress;
+        const normX = (animProgress - 0.5) * 2;
+        smY = groundY - 25 - (1 - normX * normX) * archHeight;
+      } else if (gameState === 'ANIMATING_FAIL') {
+        if (animProgress < 0.5) {
+          smX = riverLeft - 20 + (bridgeWidth / 2) * animProgress;
+          const normX = (animProgress * 0.5 - 0.5) * 2;
+          smY = groundY - 25 - (1 - normX * normX) * archHeight;
+        } else {
+          const fallT = (animProgress - 0.5) / 0.5;
+          smX = riverLeft - 20 + (bridgeWidth / 4);
+          smY = (groundY - 25 - archHeight * 0.75) + fallT * fallT * 150;
+        }
+      }
 
       drawStickman(smX, smY, gameState);
       return;
     }
 
-    // --- LEVEL 1 SCENE ---
+    // --- LEVEL 1 SCENE (Pythagoras Turm) ---
     const skyGradient = ctx.createLinearGradient(0, 0, 0, 320);
     skyGradient.addColorStop(0, '#38bdf8');
     skyGradient.addColorStop(1, '#bae6fd');
@@ -655,38 +804,24 @@
       const sx = poleBottomX + i * stoneSpacing;
       const sy = groundY + 8;
       ctx.fillStyle = (i % 2 === 0) ? '#94a3b8' : '#cbd5e1';
-      ctx.beginPath();
-      ctx.ellipse(sx, sy, 7, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(sx, sy, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.stroke();
     }
 
     ctx.save();
     ctx.strokeStyle = '#854d0e';
     ctx.lineWidth = 8;
     ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(poleTopX, poleTopY);
-    ctx.lineTo(poleBottomX, poleBottomY);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(poleTopX, poleTopY); ctx.lineTo(poleBottomX, poleBottomY); ctx.stroke();
     ctx.restore();
 
     ctx.save();
     ctx.setLineDash([6, 6]);
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#3b82f6';
-    ctx.beginPath();
-    ctx.moveTo(towerX, towerY);
-    ctx.lineTo(towerX, groundY);
-    ctx.stroke();
-
+    ctx.beginPath(); ctx.moveTo(towerX, towerY); ctx.lineTo(towerX, groundY); ctx.stroke();
     ctx.strokeStyle = '#ef4444';
-    ctx.beginPath();
-    ctx.moveTo(poleBottomX, groundY);
-    ctx.lineTo(towerX, groundY);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(poleBottomX, groundY); ctx.lineTo(towerX, groundY); ctx.stroke();
     ctx.restore();
 
     ctx.font = '600 16px Inter, sans-serif';
@@ -728,18 +863,13 @@
 
   function drawStickman(x, y, state) {
     ctx.save();
-    ctx.strokeStyle = '#f8fafc';
+    ctx.strokeStyle = (currentLevel === 2) ? '#f8fafc' : '#0f172a';
     ctx.lineWidth = 3.5;
-    ctx.fillStyle = '#f8fafc';
+    ctx.fillStyle = (currentLevel === 2) ? '#f8fafc' : '#0f172a';
 
-    ctx.beginPath();
-    ctx.arc(x, y, 8, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
 
-    ctx.beginPath();
-    ctx.moveTo(x, y + 8);
-    ctx.lineTo(x, y + 24);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, y + 8); ctx.lineTo(x, y + 24); ctx.stroke();
 
     ctx.beginPath();
     if (state === 'ANIMATING_WIN') {
@@ -762,7 +892,7 @@
     ctx.restore();
   }
 
-  // Выбор ответа в Level 2
+  // Überprüfung der Multiple-Choice-Optionen (Level 2 & 3)
   function selectOption(index) {
     if (gameState !== 'IDLE') return;
 
@@ -771,10 +901,10 @@
     }
 
     if (index === correctOptionIndex) {
-      level2Streak++;
-      if (level2Streak >= 2) {
-        level2Passed = true;
-        feedback.textContent = 'Level 2 geschafft! 🎉';
+      streaks[currentLevel]++;
+      if (streaks[currentLevel] >= 2) {
+        passedLevels[currentLevel] = true;
+        feedback.textContent = `Level ${currentLevel} geschafft! 🎉`;
       } else {
         feedback.textContent = 'Richtig! 1/2 geschafft!';
       }
@@ -782,7 +912,7 @@
       gameState = 'ANIMATING_WIN';
       animateSuccess();
     } else {
-      level2Streak = 0;
+      streaks[currentLevel] = 0;
       feedback.textContent = 'Falsch! Absturz!';
       feedback.className = 'feedback wrong';
       gameState = 'ANIMATING_FAIL';
@@ -790,7 +920,7 @@
     }
   }
 
-  // Проверка ответа для Level 1
+  // Überprüfung für Level 1
   function checkAnswer() {
     if (gameState !== 'IDLE') return;
 
@@ -804,9 +934,9 @@
     answerInput.disabled = true;
 
     if (userVal === currentProblem.a) {
-      level1Streak++;
-      if (level1Streak >= 2) {
-        level1Passed = true;
+      streaks[1]++;
+      if (streaks[1] >= 2) {
+        passedLevels[1] = true;
         feedback.textContent = 'Level 1 geschafft! 🎉';
       } else {
         feedback.textContent = 'Gewonnen! 1/2 geschafft!';
@@ -815,7 +945,9 @@
       gameState = 'ANIMATING_WIN';
       animateSuccess();
     } else {
-      level1Streak = 0;
+      streaks[1] = 0;
+      feedback.textContent = 'Falsch!';
+      feedback.className = 'feedback wrong';
       gameState = 'ANIMATING_FAIL';
       animateFailure();
     }
@@ -833,7 +965,7 @@
         if (currentLevel === 1) submitBtn.style.display = 'none';
         nextBtn.style.display = 'inline-block';
         
-        if ((currentLevel === 1 && level1Passed) || (currentLevel === 2 && level2Passed)) {
+        if (passedLevels[currentLevel]) {
           nextBtn.textContent = 'Zum Menü ➔';
         } else {
           nextBtn.textContent = 'Nächste Aufgabe ➔';
@@ -866,7 +998,7 @@
   });
 
   nextBtn.addEventListener('click', () => {
-    if ((currentLevel === 1 && level1Passed) || (currentLevel === 2 && level2Passed)) {
+    if (passedLevels[currentLevel]) {
       showMenu();
     } else {
       initRound();
